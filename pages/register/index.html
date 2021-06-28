@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Register</title>
+	<meta charset="utf-8">
+	<!-- Mobile Specific Metas -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<!-- Font-->
+	<link rel="stylesheet" type="text/css" href="css/opensans-font.css">
+	<link rel="stylesheet" type="text/css" href="fonts/line-awesome/css/line-awesome.min.css">
+	<!-- Jquery -->
+	<link rel="stylesheet" href="css/jquery-validation.css">
+	<!-- Main Style Css -->
+    <link rel="stylesheet" href="css/style.css"/>
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="../../vendor/toastr/index.css">
+</head>
+<body class="form-v4">
+	<div class="page-content">
+		<div class="form-v4-content">
+			<div class="form-left">
+				<h2>INFOMATION</h2>
+				<p class="text-1">You can register an account in the Thermopylae Demo application.</p>
+				<p class="text-2"><span>Public Key:</span> Public key needs to be in PEM format.</p>
+				<p class="text-2"><span>Data Privacy:</span> Your private data won't be shared with anyone and will be used only for app purposes.</p>
+				<div class="form-left-last">
+					<input type="submit" name="account" id="have_an_account" class="account" value="Have An Account">
+				</div>
+			</div>
+			<form class="form-detail" id="registrationform">
+				<h2>REGISTER FORM</h2>
+				<div class="form-row">
+					<label for="username">Your Username</label>
+					<input type="text" name="username" id="username" class="input-text" required pattern="^(?=.{6,50}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$">
+				</div>
+				<div class="form-row">
+					<label for="email">Your Email</label>
+					<input type="text" name="email" id="email" class="input-text" required>
+				</div>
+				<div class="form-row">
+					<label for="telephone">Your Telephone</label>
+					<input type="text" name="telephone" id="telephone" class="input-text" required pattern="^\+[1-9]\d{1,14}$">
+				</div>
+				<div class="form-group">
+					<div class="form-row form-row-1 ">
+						<label for="password">Password</label>
+						<input type="password" name="password" id="password" class="input-text" required>
+					</div>
+					<div class="form-row form-row-1">
+						<label for="confirmPassword">Confirm Password</label>
+						<input type="password" name="confirmPassword" id="confirmPassword" class="input-text" required>
+					</div>
+				</div>
+				<div class="form-row">
+					<label for="publicKey">Your Public Key (Optional)</label>
+					<input type="text" name="publicKey" id="publicKey" class="input-text">
+				</div>
+				<div class="form-row-last">
+					<input type="submit" name="register" class="register" value="Register">
+				</div>
+			</form>
+		</div>
+	</div>
+	<script src="js/jquery.js"></script>
+	<script src="js/jquery-validate.js"></script>
+	<script src="js/jquery-validate-additional-methods.js"></script>
+	<script src="../../vendor/toastr/index.js"></script>
+	<script type="module">
+		import { API } from '../../js/api.js';
+		import { PAGES } from '../../js/contants.js';
+
+		// just for the demos, avoids form submit
+		jQuery.validator.setDefaults({
+		  	success: function (label) {
+        		label.attr('id', 'valid');
+   		 	},
+		});
+
+		$("#registrationform").validate({
+		  	rules: {
+				email: {
+					email: true
+				},
+			    password: {
+			    	required: true,
+					minlength: 14,
+					maxlength: 4096
+				},
+		    	confirmPassword: {
+		      		equalTo: "#password"
+		    	}
+		  	},
+		  	messages: {
+				username: {
+					required: "Please enter an username"
+				},
+		  		email: {
+		  			required: "Please provide an email"
+		  		},
+				telephone: {
+					required: "Please provide a telephone number"
+				},
+		  		password: {
+	  				required: "Please enter a password"
+		  		},
+		  		confirmPassword: {
+		  			required: "Please enter a password",
+		      		equalTo: "Password doesn't match"
+		    	}
+		  	},
+			submitHandler: function (form, event) {
+				event.preventDefault();
+
+				API.register({
+					username: $('#username').val(),
+					password: $('#password').val(),
+					email: $('#email').val(),
+					telephone: $('#telephone').val(),
+					pubKey: $('#publicKey').val()
+				}).then(() => {
+					window.location.href = PAGES.ACTIVATE_ACCOUNT;
+				}).catch(e => {
+					toastr.error(e.message, e.code || 'Error');
+				})
+			}
+		});
+
+		$('#have_an_account').on('click', () => {
+			window.location.href = PAGES.LOGIN;
+		});
+	</script>
+</body>
+</html>
