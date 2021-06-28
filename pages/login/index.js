@@ -23,7 +23,6 @@ import { PAGES, SYMBOLS } from '../../js/contants.js';
     [ Attach navigation ]*/
     $($('#forgot-password-link')[0]).attr('href', PAGES.FORGOT_PASSWORD);
     $($('#register-link')[0]).attr('href', PAGES.REGISTER);
-    $($('#activate-account-link')[0]).attr('href', PAGES.ACTIVATE_ACCOUNT);
 
 
     /*==================================================================

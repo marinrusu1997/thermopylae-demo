@@ -11,6 +11,14 @@ const METHODS = {
         method: 'post',
         path: '/api/auth/register',
     },
+    ACTIVATE_ACCOUNT: {
+        method: 'put',
+        path: '/api/auth/account/activate',
+    },
+    CREATE_FORGOT_PASSWORD_SESSION: {
+        method: 'post',
+        path: '/api/auth/forgot/password/session',
+    },
     REFRESH_SESSION: {
         method: 'put',
         path: '/api/auth/session/refresh'
@@ -134,6 +142,96 @@ class Api {
             }
 
             if (body.error.code === 'WEAK_PASSWORD') {
+                throw new ApiError(body.error.code, body.error.message);
+            }
+        }
+
+        if (response.status === 409) {
+            /** @type {ErrorBody} */
+            const body = await response.json();
+
+            if (body.error.code === 'ACCOUNT_WITH_DUPLICATED_FIELDS') {
+                throw new ApiError('DUPLICATE', `Account with same ${body.error.message.join(', ')} already exists.`);
+            }
+        }
+
+        throw new ApiError('MISCONFIGURATION', `Can't interpret server response. Status: ${response.status}.`);
+    }
+
+    /**
+     * @param {string} token
+     * @returns {Promise<void>}
+     */
+    async activateAccount(token) {
+        const response = await fetch(new URL(`${METHODS.ACTIVATE_ACCOUNT.path}?token=${token}`, BASE_URL).href, {
+            method: METHODS.ACTIVATE_ACCOUNT.method,
+            referrerPolicy: 'no-referrer'
+        });
+
+        if (response.status === 204) {
+            return;
+        }
+
+        if (response.status === 500) {
+            throw new ApiError('INTERNAL_SERVER_ERROR','Internal server error.');
+        }
+
+        if (response.status === 400) {
+            /** @type {ErrorBody} */
+            const body = await response.json();
+
+            if (body.error.code === 'INVALID_INPUT') {
+                throw new ApiError(body.error.code, body.error.message);
+            }
+
+            if (body.error.code === 'INVALID_TOKEN') {
+                throw new ApiError(body.error.code, body.error.message);
+            }
+        }
+
+        if (response.status === 409) {
+            /** @type {ErrorBody} */
+            const body = await response.json();
+
+            if (body.error.code === 'ACCOUNT_WITH_DUPLICATED_FIELDS') {
+                throw new ApiError('DUPLICATE', `Account with same ${body.error.message.join(', ')} already exists.`);
+            }
+        }
+
+        throw new ApiError('MISCONFIGURATION', `Can't interpret server response. Status: ${response.status}.`);
+    }
+
+    /**
+     * @param {'username' | 'email' | 'telephone'}  field
+     * @param {string}                              value
+     * @returns {Promise<void>}
+     */
+    async createForgotPasswordSession(field, value) {
+        const response = await fetch(new URL(`${METHODS.CREATE_FORGOT_PASSWORD_SESSION.path}`, BASE_URL).href, {
+            method: METHODS.CREATE_FORGOT_PASSWORD_SESSION.method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                [field]: value,
+                sendTokenVia: field === 'telephone' ? 'sms' : 'email'
+            }),
+            referrerPolicy: 'no-referrer'
+        });
+
+        if (response.status === 202) {
+            return;
+        }
+
+        if (response.status === 500) {
+            throw new ApiError('INTERNAL_SERVER_ERROR','Internal server error.');
+        }
+
+        if (response.status === 400) {
+            /** @type {ErrorBody} */
+            const body = await response.json();
+
+            if (body.error.code === 'INVALID_INPUT') {
                 throw new ApiError(body.error.code, body.error.message);
             }
         }

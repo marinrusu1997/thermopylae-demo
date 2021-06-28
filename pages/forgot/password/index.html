@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Forgot Password</title>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="stylesheet" type="text/css" href="../../../vendor/bootstrap/css/bootstrap.min.css">
+<!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="../../../vendor/select2/select2.min.css">
+<!--===============================================================================================-->
+    <link rel="stylesheet" href="../../../vendor/jquery-validation/jquery-validate.css">
+<!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="../../../vendor/toastr/index.css">
+<!--===============================================================================================-->
+    <link type="text/css" rel="stylesheet" href="../../../vendor/waitme/index.min.css">
+<!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="./index.css">
+</head>
+<body class='snippet-body' style="background-image: url('../../../images/bg-01.jpg');">
+    <div class="container padding-bottom-3x mb-2 mt-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="forgot">
+                    <h2>Forgot your password?</h2>
+                    <p>Change your password in three easy steps. This will help you to secure your password!</p>
+                    <ol class="list-unstyled">
+                        <li><span class="text-primary text-medium">1. </span>Enter a field from your account that you remember.</li>
+                        <li><span class="text-primary text-medium">2. </span>Our system will send you a token.</li>
+                        <li><span class="text-primary text-medium">3. </span>Use the token to reset your password.</li>
+                    </ol>
+                </div>
+                <form id="request-forgot-password-token-form" class="card mt-4">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="remembered-field-name">Enter account field that you remember</label>
+                            <select class="form-control" id="remembered-field-name" required>
+                                <option value="TEL">telephone</option>
+                                <option value="EML">email</option>
+                                <option value="USR">username</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label id="remembered-field-value-label" for="remembered-field-value">Enter account email</label>
+                            <input id="remembered-field-value" name="remembered-field-value" class="form-control" type="text" required pattern="^\+[1-9]\d{1,14}$">
+                            <small id="remembered-field-value-details" class="form-text text-muted">Enter the email address you used during the account registration. Then we'll email a token to this address.</small>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-success" type="submit">Get Reset Token</button>
+                        <button id="back-to-login-btn" class="btn btn-danger" type="button">Back to Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="resetPasswordModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Reset Password</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="reset-password-form">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="reset-password-token-input" placeholder="Reset Password Token">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="reset-password-modal-btn" type="button" class="btn btn-primary">Reset Password</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!--===============================================================================================-->
+    <script src="../../../vendor/jquery/jquery-3.2.1.min.js"></script>
+<!--===============================================================================================-->
+    <script src="../../../vendor/bootstrap/js/popper.js"></script>
+    <script src="../../../vendor/bootstrap/js/bootstrap.min.js"></script>
+<!--===============================================================================================-->
+    <script src="../../../vendor/select2/select2.min.js"></script>
+<!--===============================================================================================-->
+    <script src="../../../vendor/jquery-validation/jquery-validate.js"></script>
+    <script src="../../../vendor/jquery-validation/jquery-validate-additional-methods.js"></script>
+<!--===============================================================================================-->
+    <script src="../../../vendor/toastr/index.js"></script>
+<!--===============================================================================================-->
+    <script src="../../../vendor/waitme/index.min.js"></script>
+<!--===============================================================================================-->
+    <script src="./index.js" type="module"></script>
+</body>
+</html>

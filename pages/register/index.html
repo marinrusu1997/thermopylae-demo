@@ -9,11 +9,15 @@
 	<link rel="stylesheet" type="text/css" href="css/opensans-font.css">
 	<link rel="stylesheet" type="text/css" href="fonts/line-awesome/css/line-awesome.min.css">
 	<!-- Jquery -->
-	<link rel="stylesheet" href="css/jquery-validation.css">
+	<link rel="stylesheet" href="../../vendor/jquery-validation/jquery-validate.css">
 	<!-- Main Style Css -->
     <link rel="stylesheet" href="css/style.css"/>
 	<!--===============================================================================================-->
 	<link rel="stylesheet" type="text/css" href="../../vendor/toastr/index.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+	<!--===============================================================================================-->
+	<link type="text/css" rel="stylesheet" href="../../vendor/waitme/index.min.css">
 </head>
 <body class="form-v4">
 	<div class="page-content">
@@ -21,10 +25,45 @@
 			<div class="form-left">
 				<h2>INFOMATION</h2>
 				<p class="text-1">You can register an account in the Thermopylae Demo application.</p>
-				<p class="text-2"><span>Public Key:</span> Public key needs to be in PEM format.</p>
+				<p class="text-2">
+					<span>Public Key:</span> Public key will be used as protection mechanism in the forgot password procedure. <br/>
+					In case you provide it, forgot password token will be encrypted with this key before it is sent to you.
+					When you receive token, you need to decrypt it with your private key, and then provide it to reset password. <br/>
+					Key needs to be in <strong>PEM format</strong>, max accepted size being <strong>2048 bit</strong>.
+					Token will be encrypted with <strong>RSA/ECB/OAEPWithSHA-1AndMGF1Padding</strong> cipher and sent as <strong>base64</strong> string.
+				</p>
 				<p class="text-2"><span>Data Privacy:</span> Your private data won't be shared with anyone and will be used only for app purposes.</p>
 				<div class="form-left-last">
 					<input type="submit" name="account" id="have_an_account" class="account" value="Have An Account">
+				</div>
+
+				<!-- Button trigger modal -->
+				<button type="button" class="btn btn-primaryv btn-lg" data-toggle="modal" data-target="#activateAccountModal">
+					Activate Account
+				</button>
+
+				<!-- Modal -->
+				<div class="modal fade" id="activateAccountModal" tabindex="-1" role="dialog" aria-hidden="true">
+					<div class="modal-dialog modal-dialog-centered" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" style="color:black">Activate account</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body">
+								<form id="activate-account-form">
+									<div class="form-group">
+										<input type="text" class="form-control" id="activate-account-token-input" placeholder="Token">
+									</div>
+								</form>
+							</div>
+							<div class="modal-footer">
+								<button id="activate-account-modal-btn" type="button" class="btn btn-primary">Activate</button>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 			<form class="form-detail" id="registrationform">
@@ -53,7 +92,7 @@
 				</div>
 				<div class="form-row">
 					<label for="publicKey">Your Public Key (Optional)</label>
-					<input type="text" name="publicKey" id="publicKey" class="input-text">
+					<textarea cols="40" rows="5" name="publicKey" id="publicKey" class="input-text"></textarea>
 				</div>
 				<div class="form-row-last">
 					<input type="submit" name="register" class="register" value="Register">
@@ -61,10 +100,13 @@
 			</form>
 		</div>
 	</div>
-	<script src="js/jquery.js"></script>
-	<script src="js/jquery-validate.js"></script>
-	<script src="js/jquery-validate-additional-methods.js"></script>
+	<script src="../../vendor/jquery/jquery-3.2.1.min.js"></script>
+	<script src="../../vendor/jquery-validation/jquery-validate.js"></script>
+	<script src="../../vendor/jquery-validation/jquery-validate-additional-methods.js"></script>
 	<script src="../../vendor/toastr/index.js"></script>
+	<script src="../../vendor/waitme/index.min.js"></script>
+	<script src="../../vendor/bootstrap/js/popper.min.js"></script>
+	<script src="../../vendor/bootstrap/js/bootstrap.min.js"></script>
 	<script type="module">
 		import { API } from '../../js/api.js';
 		import { PAGES } from '../../js/contants.js';
@@ -75,6 +117,10 @@
         		label.attr('id', 'valid');
    		 	},
 		});
+
+		jQuery.validator.addMethod("pemFormat", function(value, element) {
+			return this.optional(element) || (value.startsWith('-----BEGIN RSA PUBLIC KEY-----\n') && value.endsWith('\n-----END RSA PUBLIC KEY-----'));
+		}, "Please enter a key in PEM format");
 
 		$("#registrationform").validate({
 		  	rules: {
@@ -88,7 +134,10 @@
 				},
 		    	confirmPassword: {
 		      		equalTo: "#password"
-		    	}
+		    	},
+				publicKey: {
+					pemFormat: true
+				}
 		  	},
 		  	messages: {
 				username: {
@@ -111,23 +160,57 @@
 			submitHandler: function (form, event) {
 				event.preventDefault();
 
+				runWaitMe('registrationform');
+
 				API.register({
-					username: $('#username').val(),
-					password: $('#password').val(),
-					email: $('#email').val(),
-					telephone: $('#telephone').val(),
-					pubKey: $('#publicKey').val()
+					username: $('#username').val().trim(),
+					password: $('#password').val().trim(),
+					email: $('#email').val().trim(),
+					telephone: $('#telephone').val().trim(),
+					pubKey: $('#publicKey').val().trim()
 				}).then(() => {
-					window.location.href = PAGES.ACTIVATE_ACCOUNT;
+					toastr.success('Activate account token has been sent to your email.');
 				}).catch(e => {
 					toastr.error(e.message, e.code || 'Error');
-				})
+				}).finally(() => stopWaitMe('registrationform'));
 			}
 		});
 
 		$('#have_an_account').on('click', () => {
 			window.location.href = PAGES.LOGIN;
 		});
+
+		$('#activate-account-modal-btn').on('click', () => {
+			const token = $('#activate-account-token-input').val().trim();
+			if (!token) {
+				return toastr.warning('Please enter activate account token');
+			}
+
+			runWaitMe('activate-account-form');
+			API.activateAccount(token)
+				.then(() => {
+					toastr.success('Account has been activated.');
+					setTimeout(() => {
+						window.location.href = PAGES.LOGIN;
+					}, 1000);
+				}).catch(e => {
+					toastr.error(e.message, e.code || 'Error');
+				}).finally(() => stopWaitMe('activate-account-form'));
+		});
+
+		function runWaitMe(formId) {
+			$(`#${formId}`).waitMe({
+				effect: 'roundBounce',
+				text: '',
+				bg: 'rgba(255,255,255,0.7)',
+				color: '#000',
+				waitTime: -1
+			});
+		}
+
+		function stopWaitMe(formId) {
+			$(`#${formId}`).waitMe('hide');
+		}
 	</script>
 </body>
 </html>
