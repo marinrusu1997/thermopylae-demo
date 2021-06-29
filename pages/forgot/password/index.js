@@ -1,5 +1,6 @@
 import { API } from '../../../js/api.js';
 import { PAGES } from '../../../js/contants.js';
+import { CRYPTO } from '../../../js/crypto.js';
 
 (function ($) {
     "use strict";
@@ -22,10 +23,65 @@ import { PAGES } from '../../../js/contants.js';
             API.createForgotPasswordSession(fieldName, fieldValue)
                 .then(() => {
                     toastr.success('Forgot password token has been sent.');
+                    $('#resetPasswordModal').modal('toggle');
                 }).catch(e => {
                     toastr.error(e.message, e.code || 'Error');
                 }).finally(() => stopWaitMe('request-forgot-password-token-form'));
         }
+    });
+
+    $('#reset-password-modal-btn').on('click', async () => {
+        /* GET VALUES */
+        let token = $('#reset-password-token-input').val().trim();
+        const newPassword = $('#reset-password-new-password-input').val().trim();
+        const confirmPassword = $('#reset-password-new-password-confirm-input').val().trim();
+        const privateKey = $('#reset-password-private-key-input').val().trim();
+
+        /* VALIDATE THEM */
+        if (!token) {
+            return toastr.warning('Please enter reset password token');
+        }
+
+        if (!newPassword) {
+            return toastr.warning('Please enter new password');
+        }
+        if (newPassword.length < 14) {
+            return toastr.warning('New password needs to contain at least 14 characters');
+        }
+        if (newPassword.length > 4096) {
+            return toastr.warning('New password needs to contain no more than 4096 characters');
+        }
+
+        if (!confirmPassword) {
+            return toastr.warning('Please enter new password confirmation');
+        }
+        if (newPassword !== confirmPassword) {
+            return toastr.warning('Confirmed password does not match new password');
+        }
+
+        /* DECRYPT TOKEN */
+        if (privateKey) {
+            try {
+                token = CRYPTO.privateDecrypt(privateKey, token);
+            } catch (e) {
+                toastr.error(e.message, 'INVALID PRIVATE KEY');
+                return;
+            }
+        }
+
+        /* CHANGE PASSWORD */
+        runWaitMe('reset-password-form');
+        API.changeForgottenPassword(token, newPassword)
+            .then(() => {
+                toastr.success('Password has been reset.');
+                $('#resetPasswordModal').modal('hide');
+
+                setTimeout(() => {
+                    window.location.href = PAGES.LOGIN;
+                }, 2000);
+            }).catch(e => {
+                toastr.error(e.message, e.code || 'Error');
+            }).finally(() => stopWaitMe('reset-password-form'));
     });
 
     /* LISTENERS */
@@ -64,9 +120,6 @@ import { PAGES } from '../../../js/contants.js';
                 console.error('Unknown selection ' + e.params.data.id);
         }
     });
-
-    /* RESET PASSWORD */
-    $('#resetPasswordModal').modal('toggle');
 
     /* UTILS */
     function runWaitMe(formId) {

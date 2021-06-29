@@ -30,7 +30,7 @@
 					In case you provide it, forgot password token will be encrypted with this key before it is sent to you.
 					When you receive token, you need to decrypt it with your private key, and then provide it to reset password. <br/>
 					Key needs to be in <strong>PEM format</strong>, max accepted size being <strong>2048 bit</strong>.
-					Token will be encrypted with <strong>RSA/ECB/OAEPWithSHA-1AndMGF1Padding</strong> cipher and sent as <strong>base64</strong> string.
+					Token will be encrypted with <strong>RSA/ECB/OAEPWithSHA-256AndMGF1Padding</strong> cipher and sent as <strong>base64</strong> string.
 				</p>
 				<p class="text-2"><span>Data Privacy:</span> Your private data won't be shared with anyone and will be used only for app purposes.</p>
 				<div class="form-left-last">

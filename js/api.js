@@ -19,6 +19,10 @@ const METHODS = {
         method: 'post',
         path: '/api/auth/forgot/password/session',
     },
+    CHANGE_FORGOTTEN_PASSWORD: {
+        method: 'put',
+        path: '/api/auth/account/password/forgotten',
+    },
     REFRESH_SESSION: {
         method: 'put',
         path: '/api/auth/session/refresh'
@@ -233,6 +237,57 @@ class Api {
 
             if (body.error.code === 'INVALID_INPUT') {
                 throw new ApiError(body.error.code, body.error.message);
+            }
+        }
+
+        throw new ApiError('MISCONFIGURATION', `Can't interpret server response. Status: ${response.status}.`);
+    }
+
+    /**
+     * @param {string}  token
+     * @param {string}  newPassword
+     * @returns {Promise<void>}
+     */
+    async changeForgottenPassword(token, newPassword) {
+        const response = await fetch(new URL(`${METHODS.CHANGE_FORGOTTEN_PASSWORD.path}`, BASE_URL).href, {
+            method: METHODS.CHANGE_FORGOTTEN_PASSWORD.method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ token, newPassword }),
+            referrerPolicy: 'no-referrer'
+        });
+
+        if (response.status === 204) {
+            return;
+        }
+
+        if (response.status === 500) {
+            throw new ApiError('INTERNAL_SERVER_ERROR','Internal server error.');
+        }
+
+        if (response.status === 400 || response.status === 404 || response.status === 410) {
+            /** @type {ErrorBody} */
+            const body = await response.json();
+
+            if (body.error.code === 'INVALID_INPUT') {
+                throw new ApiError(body.error.code, body.error.message);
+            }
+
+            if (body.error.code === 'ACCOUNT_NOT_FOUND') {
+                throw new ApiError(body.error.code, 'Account was deleted.');
+            }
+
+            if (body.error.code === 'ACCOUNT_DISABLED') {
+                throw new ApiError(body.error.code, 'Account was disabled.');
+            }
+
+            if (body.error.code === 'SESSION_NOT_FOUND') {
+                throw new ApiError(body.error.code, 'Reset password token is not valid.');
+            }
+
+            if (body.error.code === 'WEAK_PASSWORD') {
+                throw new ApiError(body.error.code, 'Newly password is too weak.');
             }
         }
 
