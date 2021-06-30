@@ -1,7 +1,7 @@
 import { STORAGE } from './storage.js';
 import { ApiError } from './api-error.js';
 
-const BASE_URL = 'http://127.0.0.1:8080';
+const BASE_URL = window.location.origin;
 const METHODS = {
     AUTHENTICATE: {
         method: 'post',
@@ -26,6 +26,18 @@ const METHODS = {
     REFRESH_SESSION: {
         method: 'put',
         path: '/api/auth/session/refresh'
+    },
+    GET_ACTIVE_SESSIONS: {
+        method: 'get',
+        path: '/api/auth/session/active',
+    },
+    LOGOUT: {
+        method: 'delete',
+        path: '/api/auth/session/logout',
+    },
+    LOGOUT_ALL: {
+        method: 'delete',
+        path: '/api/auth/session/logout/all',
     }
 };
 
@@ -90,8 +102,7 @@ class Api {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(args),
-            referrerPolicy: 'no-referrer',
-            credentials: 'include' // @fixme remove
+            referrerPolicy: 'no-referrer'
         });
 
         if (response.status === 500) {
@@ -306,51 +317,179 @@ class Api {
         const response = await fetch(new URL(METHODS.REFRESH_SESSION.path, BASE_URL).href, {
             method: METHODS.REFRESH_SESSION.method,
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XmlHttpRequest'
             },
             body: JSON.stringify({ accountId: account.id }),
-            referrerPolicy: 'no-referrer',
-            credentials: 'include' // @fixme remove
+            referrerPolicy: 'no-referrer'
         });
+
+        if (response.status === 204) {
+            return true;
+        }
 
         if (response.status === 500) {
             throw new ApiError('INTERNAL_SERVER_ERROR','Internal server error.');
         }
 
-        if (!response.ok) {
+        if (response.status === 400) {
             /** @type {ErrorBody} */
             const body = await response.json();
 
-            if (response.status === 400) {
-                if (body.error.code === 'INVALID_INPUT') {
-                    throw new ApiError(body.error.code, body.error.message);
-                }
-
-                if (body.error.code === 'REFRESH_TOKEN_REQUIRED') {
-                    console.error(body.error);
-                    return false;
-                }
-
-                if (body.error.code === 'CSRF_HEADER_REQUIRED') {
-                    throw new ApiError(body.error.code, body.error.message);
-                }
-
-                if (body.error.code === 'AUTHENTICATION_DEVICE_MISMATCH') {
-                    throw new ApiError(body.error.code, body.error.message);
-                }
+            if (body.error.code === 'INVALID_INPUT') {
+                throw new ApiError(body.error.code, body.error.message);
             }
 
-            if (response.status === 404) {
-                if (body.error.code === 'INVALID_REFRESH_TOKEN') {
-                    console.error(body.error);
-                    return false;
-                }
+            if (body.error.code === 'REFRESH_TOKEN_REQUIRED') {
+                console.error(body.error);
+                return false;
             }
 
-            throw new ApiError('MISCONFIGURATION', `Unable to interpret server response. Status: ${response.status}. Body: ${JSON.stringify(body)}`);
+            if (body.error.code === 'CSRF_HEADER_REQUIRED') {
+                throw new ApiError(body.error.code, body.error.message);
+            }
+
+            if (body.error.code === 'AUTHENTICATION_DEVICE_MISMATCH') {
+                throw new ApiError(body.error.code, body.error.message);
+            }
         }
 
-        return false;
+        if (response.status === 404) {
+            /** @type {ErrorBody} */
+            const body = await response.json();
+
+            if (body.error.code === 'INVALID_REFRESH_TOKEN') {
+                console.error(body.error);
+                return false;
+            }
+        }
+
+        throw new ApiError('MISCONFIGURATION', `Unable to interpret server response. Status: ${response.status}.`);
+    }
+
+    async getActiveSessions() {
+        if (!STORAGE.hasJwt()) {
+            if (!(await this.refreshUserSession())) {
+                throw new ApiError('INVALID_SESSION', 'Session expired.');
+            }
+        }
+
+        const response = await fetch(new URL(METHODS.GET_ACTIVE_SESSIONS.path, BASE_URL).href, {
+            method: METHODS.GET_ACTIVE_SESSIONS.method,
+            headers: {
+                'X-Requested-With': 'XmlHttpRequest'
+            },
+            referrerPolicy: 'no-referrer'
+        });
+
+
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    async logout() {
+        if (!STORAGE.hasJwt()) {
+            if (!(await this.refreshUserSession())) {
+                return; // session is already invalid, nothing to do
+            }
+        }
+
+        const response = await fetch(new URL(METHODS.LOGOUT.path, BASE_URL).href, {
+            method: METHODS.LOGOUT.method,
+            headers: {
+                'X-Requested-With': 'XmlHttpRequest'
+            },
+            referrerPolicy: 'no-referrer'
+        });
+
+        if (response.status === 204) {
+            return;
+        }
+
+        if (response.status === 500) {
+            throw new ApiError('INTERNAL_SERVER_ERROR','Internal server error.');
+        }
+
+        if (response.status === 400) {
+            /** @type {ErrorBody} */
+            const body = await response.json();
+
+            if (body.error.code === 'REFRESH_TOKEN_REQUIRED') {
+                console.error(body.error);
+                return; // cookie expired, consider logout successful
+            }
+
+            if (body.error.code === 'ACCESS_TOKEN_REQUIRED') {
+                throw new ApiError(body.error.code, 'Please retry logout operation.');
+            }
+
+            if (body.error.code === 'CSRF_HEADER_REQUIRED') {
+                throw new ApiError(body.error.code, body.error.message);
+            }
+        }
+
+        if (response.status === 401) {
+            /** @type {ErrorBody} */
+            const body = await response.json();
+
+            if (body.error.code === 'INVALID_SESSION') {
+                throw new ApiError(body.error.code, 'Please retry logout operation.');
+            }
+        }
+
+        throw new ApiError('MISCONFIGURATION', `Unable to interpret server response. Status: ${response.status}.`);
+    }
+
+    /**
+     * @returns {Promise<{ numberOfDeletedSessions: number }>}
+     */
+    async logoutAll() {
+        if (!STORAGE.hasJwt()) {
+            if (!(await this.refreshUserSession())) {
+                throw new Error('Current session can\'t be refreshed. Please perform a simple logout.');
+            }
+        }
+
+        const response = await fetch(new URL(METHODS.LOGOUT_ALL.path, BASE_URL).href, {
+            method: METHODS.LOGOUT_ALL.method,
+            headers: {
+                'X-Requested-With': 'XmlHttpRequest'
+            },
+            referrerPolicy: 'no-referrer'
+        });
+
+        if (response.status === 200) {
+            return await response.json();
+        }
+
+        if (response.status === 500) {
+            throw new ApiError('INTERNAL_SERVER_ERROR','Internal server error.');
+        }
+
+        if (response.status === 400) {
+            /** @type {ErrorBody} */
+            const body = await response.json();
+
+            if (body.error.code === 'ACCESS_TOKEN_REQUIRED') {
+                throw new ApiError(body.error.code, 'Please perform a simple logout.');
+            }
+
+            if (body.error.code === 'CSRF_HEADER_REQUIRED') {
+                throw new ApiError(body.error.code, body.error.message);
+            }
+        }
+
+        if (response.status === 401) {
+            /** @type {ErrorBody} */
+            const body = await response.json();
+
+            if (body.error.code === 'INVALID_SESSION') {
+                throw new ApiError(body.error.code, 'Please perform a simple logout.');
+            }
+        }
+
+        throw new ApiError('MISCONFIGURATION', `Unable to interpret server response. Status: ${response.status}.`);
     }
 }
 

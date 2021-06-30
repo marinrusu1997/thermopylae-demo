@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Main Page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--===============================================================================================-->
+    <link rel="icon" type="image/png" href="../../images/icons/favicon.ico"/>
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="../../fonts/font-awesome-5.15.1/css/all.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="../../fonts/google.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="../../fonts/mdb-3.6.0/mdb.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="../../vendor/toastr/index.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <!-- Container wrapper -->
+        <div class="container-fluid">
+            <!-- Toggle button -->
+            <button
+                    class="navbar-toggler"
+                    type="button"
+                    data-mdb-toggle="collapse"
+                    data-mdb-target="#navbarSupportedContent"
+                    aria-controls="navbarSupportedContent"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation"
+            >
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Collapsible wrapper -->
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <!-- Navbar brand -->
+                <a class="navbar-brand">
+                    <img
+                            src="../../images/spartan-shield-logo.png"
+                            class="me-2"
+                            height="40"
+                            alt=""
+                            loading="lazy"
+                    />
+                    <small>Thermopylae</small>
+                </a>
+                <!-- Left links -->
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a id="successful-authentications-link" class="nav-link" href="#">Successful Authentications</a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="failed-authentications-link" class="nav-link" href="#">Failed Authentications</a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="active-sessions-link" class="nav-link" href="#">Active Sessions</a>
+                    </li>
+                </ul>
+                <!-- Left links -->
+            </div>
+            <!-- Collapsible wrapper -->
+
+            <!-- Right elements -->
+            <div class="d-flex align-items-center">
+
+                <!-- Avatar -->
+                <a
+                        class="dropdown-toggle d-flex align-items-center hidden-arrow"
+                        href="#"
+                        id="navbarDropdownMenuLink"
+                        role="button"
+                        data-mdb-toggle="dropdown"
+                        aria-expanded="false"
+                >
+                    <img
+                            src="../../images/avatar.jpg"
+                            class="rounded-circle"
+                            height="25"
+                            alt=""
+                            loading="lazy"
+                    />
+                </a>
+                <ul
+                        class="dropdown-menu dropdown-menu-end"
+                        aria-labelledby="navbarDropdownMenuLink"
+                >
+                    <li>
+                        <a class="dropdown-item" href="#">Two Factor</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#">Change Password</a>
+                    </li>
+                    <li>
+                        <a id="logout-link" class="dropdown-item" href="#">Logout</a>
+                    </li>
+                    <li>
+                        <a id="logout-all-link" class="dropdown-item" href="#">Logout All</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- Right elements -->
+        </div>
+        <!-- Container wrapper -->
+    </nav>
+    <!-- Navbar -->
+
+    <!-- Successful Authentications Table -->
+    <table id="successful-authentications-table" class="table table-striped table-hover table-bordered border-primary align-middle" style="display:none;">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">First</th>
+            <th scope="col">Last</th>
+            <th scope="col">Handle</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th scope="row">1</th>
+            <td>Mark</td>
+            <td>Otto</td>
+            <td>@mdo</td>
+        </tr>
+        <tr>
+            <th scope="row">2</th>
+            <td>Jacob</td>
+            <td>Thornton</td>
+            <td>@fat</td>
+        </tr>
+        <tr>
+            <th scope="row">3</th>
+            <td colspan="2">Larry the Bird</td>
+            <td>@twitter</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Failed Authentications Table -->
+    <table id="failed-authentications-table" class="table table-striped table-hover table-bordered border-primary align-middle" style="display:none;">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">First</th>
+            <th scope="col">Last</th>
+            <th scope="col">Handle</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th scope="row">1</th>
+            <td>Mark</td>
+            <td>Otto</td>
+            <td>@mdo</td>
+        </tr>
+        <tr>
+            <th scope="row">2</th>
+            <td>Jacob</td>
+            <td>Thornton</td>
+            <td>@fat</td>
+        </tr>
+        <tr>
+            <th scope="row">3</th>
+            <td colspan="2">Larry the Bird</td>
+            <td>@twitter</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Active Sessions Table -->
+    <table id="active-sessions-table" class="table table-striped table-hover table-bordered border-primary align-middle" style="display:none;">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Lorem</th>
+            <th scope="col">Ipsum</th>
+            <th scope="col">Dolor</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th scope="row">1</th>
+            <td>Sit</td>
+            <td>Amet</td>
+            <td>
+                <button type="button" class="btn btn-danger btn-sm px-3">
+                    <i class="fas fa-times"></i>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">2</th>
+            <td>Adipisicing</td>
+            <td>Elit</td>
+            <td>
+                <button type="button" class="btn btn-danger btn-sm px-3">
+                    <i class="fas fa-times"></i>
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">3</th>
+            <td>Hic</td>
+            <td>Fugiat</td>
+            <td>
+                <button type="button" class="btn btn-danger btn-sm px-3">
+                    <i class="fas fa-times"></i>
+                </button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+
+    <!--===============================================================================================-->
+    <script src="../../vendor/jquery/jquery-3.2.1.min.js"></script>
+    <!--===============================================================================================-->
+    <script src="../../vendor/toastr/index.js"></script>
+    <!--===============================================================================================-->
+    <script src="../../vendor/mdb-3.6.0/mdb.min.js"></script>
+    <!--===============================================================================================-->
+    <script type="module" src="./index.js"></script>
+</body>
+</html>

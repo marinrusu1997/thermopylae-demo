@@ -5,16 +5,16 @@ const PAYLOAD_ACCESS_TOKEN_COOKIE_NAME = 'pld';
 
 const PAGES = {
     get LOGIN() {
-       return window.location.origin + '/web-app' + '/pages/login'; // @fixme remove web-app
+       return window.location.origin + '/pages/login';
     },
     get MAIN() {
-        return window.location.origin + '/web-app' + '/pages/main';  // @fixme remove web-app
+        return window.location.origin + '/pages/main';
     },
     get REGISTER() {
-        return window.location.origin + '/web-app' + '/pages/register';  // @fixme remove web-app
+        return window.location.origin + '/pages/register';
     },
     get FORGOT_PASSWORD() {
-        return window.location.origin + '/web-app' + '/pages/forgot/password';  // @fixme remove web-app
+        return window.location.origin + '/pages/forgot/password';
     }
 };
 Object.freeze(PAGES);

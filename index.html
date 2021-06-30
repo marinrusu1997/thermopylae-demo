@@ -15,14 +15,12 @@
     <!--===============================================================================================-->
     <script src="./vendor/toastr/index.js"></script>
     <!--===============================================================================================-->
-    <script type="module" src="./vendor/js.cookie.mjs"></script>
     <script type="module" defer>
-        import Cookies from './vendor/js.cookie.mjs';
         import { API } from './js/api.js';
-        import { PAYLOAD_ACCESS_TOKEN_COOKIE_NAME, PAGES } from './js/contants.js';
+        import { STORAGE } from './js/storage.js';
+        import { PAGES } from './js/contants.js';
 
-        const payloadAccessTokenCookie = Cookies.get(PAYLOAD_ACCESS_TOKEN_COOKIE_NAME);
-        if (!payloadAccessTokenCookie) {
+        if (!STORAGE.hasJwt()) {
             API.refreshUserSession()
                 .then((refreshed) => {
                     window.location.href = !refreshed ? PAGES.LOGIN : PAGES.MAIN;

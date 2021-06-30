@@ -109,6 +109,11 @@ import { PAGES, SYMBOLS } from '../../js/contants.js';
                         return;
                     }
 
+                    if (authenticationStatus.error.code === 'TOO_MANY_SESSIONS') {
+                        toastr.error(authenticationStatus.error.message, authenticationStatus.error.code);
+                        return;
+                    }
+
                     if (authenticationStatus.error.code === 'ACCOUNT_DISABLED') {
                         toastr.error('Account is disabled.', 'Error');
                         return;
