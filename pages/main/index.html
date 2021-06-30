@@ -4,6 +4,7 @@
     <title>Main Page</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="../../vendor/bootstrap/css/bootstrap.min.css">
     <!--===============================================================================================-->
     <link rel="icon" type="image/png" href="../../images/icons/favicon.ico"/>
     <!--===============================================================================================-->
@@ -14,6 +15,8 @@
     <link rel="stylesheet" type="text/css" href="../../fonts/mdb-3.6.0/mdb.min.css">
     <!--===============================================================================================-->
     <link rel="stylesheet" type="text/css" href="../../vendor/toastr/index.css">
+    <!--===============================================================================================-->
+    <link type="text/css" rel="stylesheet" href="../../vendor/waitme/index.min.css">
 </head>
 <body>
 
@@ -91,7 +94,7 @@
                         <a class="dropdown-item" href="#">Two Factor</a>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="#">Change Password</a>
+                        <a id="change-password-link" class="dropdown-item" href="#">Change Password</a>
                     </li>
                     <li>
                         <a id="logout-link" class="dropdown-item" href="#">Logout</a>
@@ -112,29 +115,13 @@
         <thead>
         <tr>
             <th scope="col">#</th>
-            <th scope="col">First</th>
-            <th scope="col">Last</th>
-            <th scope="col">Handle</th>
+            <th scope="col">IP</th>
+            <th scope="col">Device</th>
+            <th scope="col">Location</th>
+            <th scope="col">Authenticated At</th>
         </tr>
         </thead>
         <tbody>
-        <tr>
-            <th scope="row">1</th>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>@mdo</td>
-        </tr>
-        <tr>
-            <th scope="row">2</th>
-            <td>Jacob</td>
-            <td>Thornton</td>
-            <td>@fat</td>
-        </tr>
-        <tr>
-            <th scope="row">3</th>
-            <td colspan="2">Larry the Bird</td>
-            <td>@twitter</td>
-        </tr>
         </tbody>
     </table>
 
@@ -143,29 +130,13 @@
         <thead>
         <tr>
             <th scope="col">#</th>
-            <th scope="col">First</th>
-            <th scope="col">Last</th>
-            <th scope="col">Handle</th>
+            <th scope="col">IP</th>
+            <th scope="col">Device</th>
+            <th scope="col">Location</th>
+            <th scope="col">Detected At</th>
         </tr>
         </thead>
         <tbody>
-        <tr>
-            <th scope="row">1</th>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>@mdo</td>
-        </tr>
-        <tr>
-            <th scope="row">2</th>
-            <td>Jacob</td>
-            <td>Thornton</td>
-            <td>@fat</td>
-        </tr>
-        <tr>
-            <th scope="row">3</th>
-            <td colspan="2">Larry the Bird</td>
-            <td>@twitter</td>
-        </tr>
         </tbody>
     </table>
 
@@ -173,51 +144,57 @@
     <table id="active-sessions-table" class="table table-striped table-hover table-bordered border-primary align-middle" style="display:none;">
         <thead>
         <tr>
-            <th scope="col">#</th>
-            <th scope="col">Lorem</th>
-            <th scope="col">Ipsum</th>
-            <th scope="col">Dolor</th>
+            <th scope="col">IP</th>
+            <th scope="col">Device</th>
+            <th scope="col">Location</th>
+            <th scope="col">Created At</th>
+            <th scope="col">Expires At</th>
+            <th scope="col">Logout</th>
         </tr>
         </thead>
         <tbody>
-        <tr>
-            <th scope="row">1</th>
-            <td>Sit</td>
-            <td>Amet</td>
-            <td>
-                <button type="button" class="btn btn-danger btn-sm px-3">
-                    <i class="fas fa-times"></i>
-                </button>
-            </td>
-        </tr>
-        <tr>
-            <th scope="row">2</th>
-            <td>Adipisicing</td>
-            <td>Elit</td>
-            <td>
-                <button type="button" class="btn btn-danger btn-sm px-3">
-                    <i class="fas fa-times"></i>
-                </button>
-            </td>
-        </tr>
-        <tr>
-            <th scope="row">3</th>
-            <td>Hic</td>
-            <td>Fugiat</td>
-            <td>
-                <button type="button" class="btn btn-danger btn-sm px-3">
-                    <i class="fas fa-times"></i>
-                </button>
-            </td>
-        </tr>
         </tbody>
     </table>
 
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="change-password-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Change Password</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="change-password-form">
+                        <div class="form-group">
+                            <label for="change-password-old-password-input" class="col-form-label">Old Password:</label>
+                            <input type="password" class="form-control" id="change-password-old-password-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="change-password-new-password-input" class="col-form-label">New Password:</label>
+                            <input type="password" class="form-control" id="change-password-new-password-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="change-password-new-password-input" class="col-form-label">Confirm New Password:</label>
+                            <input type="password" class="form-control" id="change-password-new-password-confirm-input" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button id="change-password-modal-btn" type="button" class="btn btn-primary">Change Password</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!--===============================================================================================-->
     <script src="../../vendor/jquery/jquery-3.2.1.min.js"></script>
     <!--===============================================================================================-->
+    <script src="../../vendor/bootstrap/js/popper.js"></script>
+    <script src="../../vendor/bootstrap/js/bootstrap.min.js"></script>
+    <!--===============================================================================================-->
     <script src="../../vendor/toastr/index.js"></script>
+    <!--===============================================================================================-->
+    <script src="../../vendor/waitme/index.min.js"></script>
     <!--===============================================================================================-->
     <script src="../../vendor/mdb-3.6.0/mdb.min.js"></script>
     <!--===============================================================================================-->
