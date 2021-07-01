@@ -1,5 +1,5 @@
 const USERNAME_REGEX = /^(?=.{6,50}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/;
-const TOTP_REGEX = /^\d{8}$/;
+const TOTP_REGEX = /^\d{6,8}$/;
 
 const CORE_VALIDATOR = {
     /**

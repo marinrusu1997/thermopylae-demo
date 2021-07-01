@@ -105,10 +105,9 @@ import { ApiError } from "../../js/api-error.js";
 
     $('#change-password-link').on('click', e => {
         e.preventDefault();
-
         $('#change-password-modal').modal('toggle');
     });
-    $('#change-password-modal-btn').on('click', async () => {
+    $('#change-password-modal-btn').on('click', () => {
         /* GET VALUES */
         const oldPassword = $('#change-password-old-password-input').val().trim();
         const newPassword = $('#change-password-new-password-input').val().trim();
@@ -155,6 +154,51 @@ import { ApiError } from "../../js/api-error.js";
             })
             .catch(handleApiError)
             .finally(() => stopWaitMe('change-password-form'));
+    });
+
+    $('#two-factor-link').on('click', e => {
+        e.preventDefault();
+        $('#qr-code-container').empty();
+        $('#two-factor-modal').modal('toggle');
+    });
+    $('#two-factor-modal-btn').on('click', () => {
+        /* GET VALUES */
+        const password = $('#two-factor-password-input').val().trim();
+        const enabled = $('#two-factor-enable-input').prop('checked');
+
+        /* VALIDATE THEM */
+        if (!password) {
+            return toastr.warning('Please enter password');
+        }
+        if (password.length < 14) {
+            return toastr.warning('Password needs to contain at least 14 characters');
+        }
+        if (password.length > 4096) {
+            return toastr.warning('Password needs to contain no more than 4096 characters');
+        }
+
+        /* SET 2FA */
+        runWaitMe('two-factor-form');
+        API.setTwoFactorAuth(password, enabled)
+            .then((result) => {
+                toastr.success(enabled ? 'Two factor authentication has been enabled.' : 'Two factor authentication has been disabled.');
+
+                if (!result) {
+                    $('#change-password-modal').modal('hide');
+                    return;
+                }
+
+                $('#qr-code-container').append(
+                    $('<p>').text('Scan the following QR code with the authenticator app from your mobile phone.')
+                );
+                $('#qr-code-container').append(
+                    $('<center>').append(
+                        $('<img>').attr('src', result.totpSecretQRImageUrl)
+                    )
+                );
+            })
+            .catch(handleApiError)
+            .finally(() => stopWaitMe('two-factor-form'));
     });
 
     $('#logout-link').on('click', e => {

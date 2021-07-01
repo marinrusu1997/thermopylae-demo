@@ -43,6 +43,10 @@ const METHODS = {
         method: 'put',
         path: '/api/auth/account/password',
     },
+    SET_TWO_FACTOR_AUTH: {
+        method: 'put',
+        path: '/api/auth/two/factor',
+    },
     LOGOUT: {
         method: 'delete',
         path: '/api/auth/session/logout',
@@ -623,6 +627,90 @@ class Api {
             }
 
             if (body.error.code === 'WEAK_PASSWORD') {
+                throw new ApiError(body.error.code, body.error.message);
+            }
+
+            if (body.error.code === 'CSRF_HEADER_REQUIRED') {
+                throw new ApiError(body.error.code, body.error.message);
+            }
+
+            if (body.error.code === 'ACCESS_TOKEN_REQUIRED') {
+                throw new ApiError(body.error.code, 'Please retry operation.');
+            }
+        }
+
+        if (response.status === 401) {
+            /** @type {ErrorBody} */
+            const body = await response.json();
+
+            if (body.error.code === 'INVALID_SESSION') {
+                throw new ApiError(body.error.code, body.error.message);
+            }
+        }
+
+        if (response.status === 404) {
+            /** @type {ErrorBody} */
+            const body = await response.json();
+
+            if (body.error.code === 'ACCOUNT_NOT_FOUND') {
+                throw new ApiError(body.error.code, body.error.message);
+            }
+        }
+
+        if (response.status === 410) {
+            /** @type {ErrorBody} */
+            const body = await response.json();
+
+            if (body.error.code === 'ACCOUNT_DISABLED') {
+                throw new ApiError(body.error.code, body.error.message);
+            }
+        }
+
+        throw new ApiError('MISCONFIGURATION', `Unable to interpret server response. Status: ${response.status}.`);
+    }
+
+    /**
+     * @param {string}      password
+     * @param {boolean}     enabled
+     * @returns {Promise<{ totpSecretQRImageUrl: string } | undefined>}
+     */
+    async setTwoFactorAuth(password, enabled) {
+        if (!STORAGE.hasJwt()) {
+            if (!(await this.refreshUserSession())) {
+                throw new ApiError('INVALID_SESSION', 'Session expired.');
+            }
+        }
+
+        const response = await fetch(new URL(METHODS.SET_TWO_FACTOR_AUTH.path, BASE_URL).href, {
+            method: METHODS.SET_TWO_FACTOR_AUTH.method,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XmlHttpRequest'
+            },
+            body: JSON.stringify({ enabled, password }),
+            referrerPolicy: 'no-referrer'
+        });
+
+        if (response.status === 200) {
+            return await response.json();
+        }
+        if (response.status === 204) {
+            return;
+        }
+
+        if (response.status === 500) {
+            throw new ApiError('INTERNAL_SERVER_ERROR','Internal server error.');
+        }
+
+        if (response.status === 400) {
+            /** @type {ErrorBody} */
+            const body = await response.json();
+
+            if (body.error.code === 'INVALID_INPUT') {
+                throw new ApiError(body.error.code, body.error.message);
+            }
+
+            if (body.error.code === 'INCORRECT_PASSWORD') {
                 throw new ApiError(body.error.code, body.error.message);
             }
 

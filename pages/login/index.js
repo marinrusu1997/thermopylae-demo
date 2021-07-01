@@ -66,11 +66,13 @@ import { PAGES, SYMBOLS } from '../../js/contants.js';
 
             API.authenticate({
                 username: $(inputs.get('username')).val().trim(),
-                password: $(inputs.get('password')).val().trim(),
+                password: totpRequired ? undefined : $(inputs.get('password')).val().trim(),
                 recaptcha: recaptchaRequired ? window[SYMBOLS.WINDOW_RECAPTCHA_TOKEN] : undefined,
                 "2fa-token": totpRequired ? $(inputs.get('totp')).val().trim() : undefined
             }).then((authenticationStatus) => {
                 recaptchaRequired = false;
+                totpRequired = false;
+                $('#totp-form-div').attr('hidden', '');
 
                 if (authenticationStatus.account) {
                     window.location.href = PAGES.MAIN;
@@ -99,6 +101,7 @@ import { PAGES, SYMBOLS } from '../../js/contants.js';
                         if (authenticationStatus.nextStep === 'TWO_FACTOR_AUTH_CHECK') {
                             toastr.error('TOTP is not correct.', 'Error');
 
+                            $('#totp-form-div').removeAttr('hidden');
                             totpRequired = true;
                             return;
                         }
@@ -126,6 +129,8 @@ import { PAGES, SYMBOLS } from '../../js/contants.js';
 
                     if (authenticationStatus.error.code === 'TWO_FACTOR_AUTH_TOKEN_ISSUED_ALREADY') {
                         toastr.error('Two factor authentication code was issued already.', 'Error');
+                        $('#totp-form-div').removeAttr('hidden');
+                        totpRequired = true;
                         return;
                     }
                 }
@@ -133,8 +138,9 @@ import { PAGES, SYMBOLS } from '../../js/contants.js';
                 if (authenticationStatus.nextStep) {
                     if (authenticationStatus.nextStep === 'TWO_FACTOR_AUTH_CHECK') {
                         toastr.warning('Provide totp from authenticator app.')
-                        $('#totp-form-div')[0].removeAttr('hidden');
+                        $('#totp-form-div').removeAttr('hidden');
                         totpRequired = true;
+                        return;
                     }
                 }
 
