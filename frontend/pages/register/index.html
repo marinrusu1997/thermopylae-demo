@@ -162,12 +162,14 @@
 
 				runWaitMe('registrationform');
 
+				const pubKey = $('#publicKey').val().trim();
+
 				API.register({
 					username: $('#username').val().trim(),
 					password: $('#password').val().trim(),
 					email: $('#email').val().trim(),
 					telephone: $('#telephone').val().trim(),
-					pubKey: $('#publicKey').val().trim()
+					pubKey: pubKey.length === 0 ? undefined : pubKey
 				}).then(() => {
 					toastr.success('Activate account token has been sent to your email.');
 				}).catch(e => {

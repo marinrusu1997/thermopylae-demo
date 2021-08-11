@@ -68,7 +68,7 @@ import { PAGES, SYMBOLS } from '../../js/contants.js';
                 username: $(inputs.get('username')).val().trim(),
                 password: totpRequired ? undefined : $(inputs.get('password')).val().trim(),
                 recaptcha: recaptchaRequired ? window[SYMBOLS.WINDOW_RECAPTCHA_TOKEN] : undefined,
-                "2fa-token": totpRequired ? $(inputs.get('totp')).val().trim() : undefined
+                twoFactorAuthenticationToken: totpRequired ? $(inputs.get('totp')).val().trim() : undefined
             }).then((authenticationStatus) => {
                 recaptchaRequired = false;
                 totpRequired = false;

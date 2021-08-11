@@ -189,7 +189,7 @@ import { ApiError } from "../../js/api-error.js";
                 }
 
                 $('#qr-code-container').append(
-                    $('<p>').text('Scan the following QR code with the authenticator app from your mobile phone.')
+                    $('<p>').text('Scan the following QR code with the Google Authenticator app from your mobile phone.')
                 );
                 $('#qr-code-container').append(
                     $('<center>').append(
