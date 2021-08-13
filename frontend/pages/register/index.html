@@ -119,7 +119,9 @@
 		});
 
 		jQuery.validator.addMethod("pemFormat", function(value, element) {
-			return this.optional(element) || (value.startsWith('-----BEGIN RSA PUBLIC KEY-----\n') && value.endsWith('\n-----END RSA PUBLIC KEY-----'));
+			return this.optional(element)
+					|| (value.startsWith('-----BEGIN RSA PUBLIC KEY-----\n') && value.endsWith('\n-----END RSA PUBLIC KEY-----'))
+					|| (value.startsWith('-----BEGIN PUBLIC KEY-----\n') && value.endsWith('\n-----END PUBLIC KEY-----'));
 		}, "Please enter a key in PEM format");
 
 		$("#registrationform").validate({
